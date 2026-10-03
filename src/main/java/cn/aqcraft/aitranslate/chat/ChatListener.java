@@ -34,7 +34,7 @@ public class ChatListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onChat(AsyncChatEvent event) {
         var cfg = plugin.getConfigManager();
-        if (!cfg.isEnabled() || plugin.getTranslator().isApiKeyMissing()) return;
+        if (!cfg.isEnabled() || !plugin.getTranslator().hasUsableProvider()) return;
 
         Player sender = event.getPlayer();
         Component original = event.message();

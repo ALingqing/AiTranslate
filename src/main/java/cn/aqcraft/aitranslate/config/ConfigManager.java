@@ -58,5 +58,18 @@ public class ConfigManager {
 
     public int getCacheMaxSizePerLanguage() { return config.getInt("cache.max-size-per-language", 2000); }
     public int getMaxParallelRequests() { return config.getInt("threads.max-parallel-requests", 4); }
+
+    /** 翻译源尝试顺序（openai / baidu / youdao） */
+    public java.util.List<String> getProviderOrder() {
+        java.util.List<String> list = config.getStringList("providers.order");
+        return list.isEmpty() ? java.util.List.of("openai") : list;
+    }
+
+    public int getProviderTimeoutMs() { return Math.max(1000, config.getInt("providers.timeout-ms", 5000)); }
+    public String getBaiduAppid() { return config.getString("baidu.appid", ""); }
+    public String getBaiduSecret() { return config.getString("baidu.secret", ""); }
+    public String getYoudaoAppid() { return config.getString("youdao.appid", ""); }
+    public String getYoudaoSecret() { return config.getString("youdao.secret", ""); }
+
     public String getDefaultLanguage() { return config.getString("default-language", "zh_cn"); }
 }

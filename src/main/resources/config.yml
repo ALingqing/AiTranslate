@@ -17,6 +17,26 @@ openai:
   # 单条消息最大字符数（超过不翻译，避免爆 token / 成本）
   max-chars: 400
 
+# --- 翻译源（按顺序自动切换） ---
+# 支持: openai / baidu / youdao；前面的源失败（或未配置）时自动尝试下一个。
+#   openai = 任意 OpenAI 兼容接口（翻译质量最好，默认主源）
+#   baidu  = 百度翻译开放平台（国内低延迟）：https://fanyi-api.baidu.com
+#   youdao = 有道智云（国内低延迟）：https://ai.youdao.com
+providers:
+  order: ["openai", "baidu", "youdao"]
+  # 备用源单次请求超时（毫秒）
+  timeout-ms: 5000
+
+# 百度翻译开放平台（控制台 -> 开发者信息：APP ID / 密钥）
+baidu:
+  appid: ""
+  secret: ""
+
+# 有道智云（控制台 -> 应用管理：应用 ID / 应用密钥）
+youdao:
+  appid: ""
+  secret: ""
+
 # --- 翻译行为 ---
 # 每玩家按自己客户端语言（或菜单里选的语言）各自看到译文
 # 发送者自己看原文

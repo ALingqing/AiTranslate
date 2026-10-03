@@ -68,12 +68,16 @@ public class AiTranslatePlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(languageMenu, this);
 
         var command = getCommand("aitr");
-        if (command != null) command.setExecutor(this::onCommand);
+        if (command != null) {
+            command.setExecutor(this::onCommand);
+            command.setTabCompleter(this::onTabComplete);
+        }
 
-        if (translator.isApiKeyMissing()) {
-            getLogger().warning("尚未配置 openai.api-key，翻译不会生效！请在 config.yml 填入 Key 后 /aitr reload");
+        if (!translator.hasUsableProvider()) {
+            getLogger().warning("没有任何可用翻译源！请配置 openai.api-key 或 baidu/youdao 的 appid+secret，然后 /aitr reload");
         } else {
-            getLogger().info("已启用 | 模型: " + configManager.getOpenAiModel()
+            getLogger().info("已启用 | 翻译源: " + describeProviders(false)
+                    + " | 模型: " + configManager.getOpenAiModel()
                     + " | 语言数: " + languageManager.getLanguages().size());
         }
     }
@@ -145,7 +149,7 @@ public class AiTranslatePlugin extends JavaPlugin {
                 reloadAll();
                 sender.sendMessage(PREFIX + "配置已重载 | 模型: " + configManager.getOpenAiModel()
                         + " | 语言数: " + languageManager.getLanguages().size());
-                if (translator.isApiKeyMissing()) sender.sendMessage(PREFIX + "§c警告: openai.api-key 仍为空！");
+                if (!translator.hasUsableProvider()) sender.sendMessage(PREFIX + "§c警告: 没有任何可用翻译源（openai.api-key 或 baidu/youdao）！");
                 return true;
             }
             case "models" -> {
@@ -208,8 +212,8 @@ public class AiTranslatePlugin extends JavaPlugin {
             }
             case "status" -> {
                 sender.sendMessage(PREFIX + "§b状态");
-                sender.sendMessage("§7- 启用: §f" + configManager.isEnabled()
-                        + "§7 | api-key: " + (translator.isApiKeyMissing() ? "§c未配置" : "§a已配置"));
+                sender.sendMessage("§7- 启用: §f" + configManager.isEnabled());
+                sender.sendMessage("§7- 翻译源: §f" + describeProviders(true));
                 sender.sendMessage("§7- 接口: §f" + configManager.getOpenAiBaseUrl());
                 sender.sendMessage("§7- 模型: §f" + configManager.getOpenAiModel());
                 sender.sendMessage("§7- 默认语言: §f" + configManager.getDefaultLanguage()
@@ -246,7 +250,8 @@ public class AiTranslatePlugin extends JavaPlugin {
                     Bukkit.getScheduler().runTask(this, () -> {
                         sender.sendMessage(PREFIX + "§7原文: §f" + text);
                         if (result != null && !result.isEmpty()) {
-                            sender.sendMessage(PREFIX + "§7译文: §a" + result + " §8(" + ms + "ms)");
+                            String prov = snapshot.getLastProvider();
+                            sender.sendMessage(PREFIX + "§7译文: §a" + result + " §8(" + (prov == null ? "?" : prov) + ", " + ms + "ms)");
                         } else {
                             sender.sendMessage(PREFIX + "§c翻译失败: " + (err == null ? "未知原因" : err));
                         }
@@ -259,6 +264,49 @@ public class AiTranslatePlugin extends JavaPlugin {
                 return true;
             }
         }
+    }
+
+    // ===== Tab 补全 =====
+
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (languageManager == null || configManager == null) return java.util.Collections.emptyList();
+        if (args.length == 1) {
+            List<String> base = new java.util.ArrayList<>(Arrays.asList("lang", "auto", "status"));
+            if (sender.hasPermission("aitr.reload")) {
+                base.add("reload");
+                base.add("models");
+                base.add("setskull");
+                base.add("test");
+            }
+            return filterPrefix(base, args[0]);
+        }
+        if (args.length == 2 && (args[0].equalsIgnoreCase("lang") || args[0].equalsIgnoreCase("setskull"))) {
+            return filterPrefix(new java.util.ArrayList<>(languageManager.getLanguages().keySet()), args[1]);
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    private static List<String> filterPrefix(List<String> options, String prefix) {
+        String p = prefix == null ? "" : prefix.toLowerCase();
+        List<String> out = new java.util.ArrayList<>();
+        for (String o : options) {
+            if (o.toLowerCase().startsWith(p)) out.add(o);
+        }
+        return out;
+    }
+
+    /** 形如 openai(已配置) -> baidu(未配置) 的翻译源描述 */
+    private String describeProviders(boolean colored) {
+        StringBuilder sb = new StringBuilder();
+        for (String raw : configManager.getProviderOrder()) {
+            String name = raw.trim().toLowerCase();
+            if (sb.length() > 0) sb.append(colored ? "§7 -> §f" : " -> ");
+            boolean ready = translator.isProviderReady(name);
+            sb.append(name);
+            if (colored) sb.append(ready ? "§a(已配置)§f" : "§c(未配置)§f");
+            else sb.append(ready ? "(已配置)" : "(未配置)");
+        }
+        return sb.toString();
     }
 
     // ===== Getters =====

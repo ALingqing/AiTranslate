@@ -24,6 +24,7 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 - 默认语言可跳过：可让默认语言（中文）的观众直接看原文以省费用（默认关闭）
 - 智能跳过：纯数字、纯符号、纯链接自动跳过；可按语言配置正则，跳过“原文已经是该语言”的消息
 - 缓存与限流：内存翻译缓存 + 并发上限，避免打爆中转接口
+- 多翻译源自动切换：默认 `openai`（质量最好），失败或未配置时自动尝试百度翻译开放平台、有道智云（国内低延迟）
 - 异步处理：AI 请求全部在线程池中执行，不阻塞服务器主线程，超时自动回退原文
 
 ## 工作原理
@@ -64,6 +65,8 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 | `/aitr status` | 查看插件状态（Key、模型、你的语言解析、缓存等） | 所有玩家 |
 | `/aitr test [文本]` | 立即测试一次翻译接口，显示译文或失败原因 | `aitr.reload` |
 
+所有子命令均支持 Tab 补全：第一级参数自动列出可用子命令，`/aitr lang`、`/aitr setskull` 后会自动补全语言 id。
+
 ## 配置说明
 
 ### config.yml
@@ -82,6 +85,10 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 | `cache.max-size-per-language` | `2000` | 每种语言的缓存条目上限 |
 | `threads.max-parallel-requests` | `4` | AI 并发请求上限 |
 | `default-language` | `zh_cn` | 兜底语言 |
+| `providers.order` | `["openai","baidu","youdao"]` | 翻译源尝试顺序；未配置的源自动跳过 |
+| `providers.timeout-ms` | `5000` | 备用源单次请求超时 |
+| `baidu.appid` / `baidu.secret` | 空 | 百度翻译开放平台凭证 |
+| `youdao.appid` / `youdao.secret` | 空 | 有道智云凭证 |
 
 ### languages.yml
 
@@ -97,6 +104,15 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 | `prompt` | 该语言的系统提示词，`{text}` 会替换为原文 |
 
 更新插件不会覆盖已存在的 `languages.yml`。要使用新版内置语言库，请先删除插件目录中的 `languages.yml` 再重启服务器。
+
+### 启用百度 / 有道备用翻译源（可选，国内低延迟）
+
+1. 百度：打开 https://fanyi-api.baidu.com 注册并开通“通用文本翻译”，在控制台的“开发者信息”中获取 APP ID 与密钥，填入 `baidu.appid` / `baidu.secret`
+2. 有道：打开 https://ai.youdao.com 创建“文本翻译”应用，在“应用管理”中获取应用 ID 与应用密钥，填入 `youdao.appid` / `youdao.secret`
+3. 执行 `/aitr reload`，用 `/aitr status` 查看每个源是否已配置，用 `/aitr test 你好` 验证（结果会标注实际生效的翻译源）
+4. 翻译时按 `providers.order` 顺序尝试：前一个源失败或未配置会自动切换下一个；不支持的语种会自动跳过该源
+
+注意：只配置百度/有道也能独立工作；免费额度与 QPS 限制以各平台官方文档为准。
 
 ## 兼容性与范围
 
