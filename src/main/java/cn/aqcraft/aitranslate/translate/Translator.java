@@ -1,10 +1,10 @@
-package com.qingyu.aitranslate.translate;
+package cn.aqcraft.aitranslate.translate;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.qingyu.aitranslate.config.ConfigManager;
-import com.qingyu.aitranslate.lang.Language;
+import cn.aqcraft.aitranslate.config.ConfigManager;
+import cn.aqcraft.aitranslate.lang.Language;
 
 import java.net.URI;
 import java.net.http.HttpClient;

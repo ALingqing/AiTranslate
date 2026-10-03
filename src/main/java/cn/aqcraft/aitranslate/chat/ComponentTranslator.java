@@ -1,8 +1,8 @@
-package com.qingyu.aitranslate.chat;
+package cn.aqcraft.aitranslate.chat;
 
-import com.qingyu.aitranslate.config.ConfigManager;
-import com.qingyu.aitranslate.lang.Language;
-import com.qingyu.aitranslate.translate.Translator;
+import cn.aqcraft.aitranslate.config.ConfigManager;
+import cn.aqcraft.aitranslate.lang.Language;
+import cn.aqcraft.aitranslate.translate.Translator;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

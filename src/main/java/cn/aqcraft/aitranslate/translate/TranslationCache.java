@@ -1,4 +1,4 @@
-package com.qingyu.aitranslate.translate;
+package cn.aqcraft.aitranslate.translate;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

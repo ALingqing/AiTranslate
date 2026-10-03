@@ -1,5 +1,5 @@
 name: AiTranslate
-main: com.qingyu.aitranslate.AiTranslatePlugin
+main: cn.aqcraft.aitranslate.AiTranslatePlugin
 version: ${project.version}
 api-version: '1.18'
 authors: [qingyu]

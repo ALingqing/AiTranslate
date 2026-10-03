@@ -1,4 +1,4 @@
-package com.qingyu.aitranslate.lang;
+package cn.aqcraft.aitranslate.lang;
 
 import java.util.List;
 import java.util.regex.Pattern;

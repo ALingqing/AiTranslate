@@ -1,7 +1,7 @@
-package com.qingyu.aitranslate.chat;
+package cn.aqcraft.aitranslate.chat;
 
-import com.qingyu.aitranslate.AiTranslatePlugin;
-import com.qingyu.aitranslate.lang.Language;
+import cn.aqcraft.aitranslate.AiTranslatePlugin;
+import cn.aqcraft.aitranslate.lang.Language;
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;

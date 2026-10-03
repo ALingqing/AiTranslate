@@ -1,8 +1,8 @@
-package com.qingyu.aitranslate.gui;
+package cn.aqcraft.aitranslate.gui;
 
-import com.qingyu.aitranslate.AiTranslatePlugin;
-import com.qingyu.aitranslate.lang.Language;
-import com.qingyu.aitranslate.util.SkullUtil;
+import cn.aqcraft.aitranslate.AiTranslatePlugin;
+import cn.aqcraft.aitranslate.lang.Language;
+import cn.aqcraft.aitranslate.util.SkullUtil;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

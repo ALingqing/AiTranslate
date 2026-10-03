@@ -1,4 +1,4 @@
-package com.qingyu.aitranslate.config;
+package cn.aqcraft.aitranslate.config;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 

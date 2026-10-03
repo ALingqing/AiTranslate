@@ -1,13 +1,13 @@
-package com.qingyu.aitranslate;
+package cn.aqcraft.aitranslate;
 
-import com.qingyu.aitranslate.chat.ChatListener;
-import com.qingyu.aitranslate.chat.ComponentTranslator;
-import com.qingyu.aitranslate.config.ConfigManager;
-import com.qingyu.aitranslate.gui.LanguageMenu;
-import com.qingyu.aitranslate.lang.LanguageManager;
-import com.qingyu.aitranslate.translate.TranslationCache;
-import com.qingyu.aitranslate.translate.Translator;
-import com.qingyu.aitranslate.util.SkullUtil;
+import cn.aqcraft.aitranslate.chat.ChatListener;
+import cn.aqcraft.aitranslate.chat.ComponentTranslator;
+import cn.aqcraft.aitranslate.config.ConfigManager;
+import cn.aqcraft.aitranslate.gui.LanguageMenu;
+import cn.aqcraft.aitranslate.lang.LanguageManager;
+import cn.aqcraft.aitranslate.translate.TranslationCache;
+import cn.aqcraft.aitranslate.translate.Translator;
+import cn.aqcraft.aitranslate.util.SkullUtil;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

@@ -1,8 +1,8 @@
-package com.qingyu.aitranslate.util;
+package cn.aqcraft.aitranslate.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.qingyu.aitranslate.lang.Language;
+import cn.aqcraft.aitranslate.lang.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
