@@ -79,6 +79,9 @@ public class AiTranslatePlugin extends JavaPlugin {
             getLogger().info("已启用 | 翻译源: " + describeProviders(false)
                     + " | 模型: " + configManager.getOpenAiModel()
                     + " | 语言数: " + languageManager.getLanguages().size());
+            if (configManager.skipDefaultLanguage()) {
+                getLogger().info("提示: skip-default-language=true，默认语言(" + configManager.getDefaultLanguage() + ")的观众会跳过翻译");
+            }
         }
     }
 
@@ -100,7 +103,7 @@ public class AiTranslatePlugin extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(PREFIX + "用法: /" + label + " <lang|auto|reload|models|setskull|status|test>");
+                sender.sendMessage(PREFIX + "用法: /" + label + " <lang|auto|reload|models|setskull|status|test|simulate>");
                 return true;
             }
             if (!player.hasPermission("aitr.use")) {
@@ -259,8 +262,40 @@ public class AiTranslatePlugin extends JavaPlugin {
                 });
                 return true;
             }
+            case "simulate" -> {
+                if (!sender.hasPermission("aitr.reload")) {
+                    sender.sendMessage(PREFIX + "§c你没有权限执行该命令");
+                    return true;
+                }
+                String text = args.length > 1 ? String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                        : "Hello, welcome to the server!";
+                boolean skipDefault = configManager.skipDefaultLanguage();
+                String defaultId = configManager.getDefaultLanguage();
+                sender.sendMessage(PREFIX + "§b模拟消息: §f" + text);
+                sender.sendMessage("§7- 翻译源: §f" + describeProviders(true));
+                sender.sendMessage("§7- skip-default-language: §f" + skipDefault + "§7 | 默认语言: §f" + defaultId);
+                int shown = 0;
+                for (Player viewer : Bukkit.getOnlinePlayers()) {
+                    if (++shown > 15) { sender.sendMessage("§7- ...（其余玩家省略）"); break; }
+                    boolean isSelf = sender instanceof Player p && p.getUniqueId().equals(viewer.getUniqueId());
+                    if (isSelf) {
+                        sender.sendMessage("§7- §f" + viewer.getName() + " §7(发送者) -> 看原文（设计如此）");
+                        continue;
+                    }
+                    Language lang = languageManager.resolveFor(viewer);
+                    String verdict;
+                    if (!translator.hasUsableProvider()) verdict = "§c无可用翻译源 -> 看原文";
+                    else if (lang == null) verdict = "§c语言库为空 -> 看原文";
+                    else if (skipDefault && lang.getId().equals(defaultId)) verdict = "§e跳过：默认语言观众 -> 看原文";
+                    else verdict = "§a将翻译为 " + lang.getDisplay() + " (" + lang.getId() + ")";
+                    sender.sendMessage("§7- §f" + viewer.getName() + " §7[客户端 " + viewer.getLocale()
+                            + " -> " + (lang == null ? "?" : lang.getId()) + "] " + verdict);
+                }
+                if (shown == 0) sender.sendMessage("§7- 当前没有在线玩家");
+                return true;
+            }
             default -> {
-                sender.sendMessage(PREFIX + "命令: /" + label + " <lang|auto|reload|models|setskull|status|test>");
+                sender.sendMessage(PREFIX + "命令: /" + label + " <lang|auto|reload|models|setskull|status|test|simulate>");
                 return true;
             }
         }
@@ -277,6 +312,7 @@ public class AiTranslatePlugin extends JavaPlugin {
                 base.add("models");
                 base.add("setskull");
                 base.add("test");
+                base.add("simulate");
             }
             return filterPrefix(base, args[0]);
         }

@@ -64,6 +64,7 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 | `/aitr setskull <语言id>` | 手持头颅设为该语言国旗图标 | `aitr.reload` |
 | `/aitr status` | 查看插件状态（Key、模型、你的语言解析、缓存等） | 所有玩家 |
 | `/aitr test [文本]` | 立即测试一次翻译接口，显示译文或失败原因 | `aitr.reload` |
+| `/aitr simulate [文本]` | 模拟一条消息，列出每个在线玩家会看到的结果与跳过原因 | `aitr.reload` |
 
 所有子命令均支持 Tab 补全：第一级参数自动列出可用子命令，`/aitr lang`、`/aitr setskull` 后会自动补全语言 id。
 
@@ -129,10 +130,11 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 
 1. 执行 `/aitr status`：若 `api-key` 显示未配置，翻译完全不工作。编辑 `plugins/AiTranslate/config.yml` 填入 `openai.api-key` 后执行 `/aitr reload`
 2. 执行 `/aitr test 你好`：能看到译文说明 AI 接口正常，问题在聊天接收环节；显示失败原因（HTTP 401、模型不存在、超时等）则按提示检查 Key、模型 ID、网络
-3. 自己发送的消息自己永远看到原文（设计如此），请用第二个账号或让其他玩家观察
-4. 若 `skip-default-language` 为 `true`，中文玩家会跳过翻译；要测试翻译效果请保持 `false`
-5. 确认服务端是 Paper 或其分支（Purpur 等），纯 Spigot 不支持
-6. 控制台出现“翻译失败: ...”警告时，按警告中的 HTTP 状态与内容处理（插件会输出真实错误）
+3. 用 `/aitr simulate 你好` 模拟一条消息：会列出每个在线玩家实际会看到的结果（目标语言或跳过原因），可快速区分是“跳过”还是“没翻译”
+4. 自己发送的消息自己永远看到原文（设计如此），请用第二个账号或让其他玩家观察
+5. 若 `skip-default-language` 为 `true`，中文玩家会跳过翻译；要测试翻译效果请保持 `false`
+6. 确认服务端是 Paper 或其分支（Purpur 等），纯 Spigot 不支持
+7. 控制台出现“翻译失败: ...”警告时，按警告中的 HTTP 状态与内容处理（插件会输出真实错误）
 
 ## 从源码构建
 

@@ -8,7 +8,7 @@ description: 清屿 AI 翻译插件 - 多语言翻译聊天与物品名，支持
 commands:
   aitr:
     description: AI 翻译插件主命令
-    usage: /aitr <lang|auto|reload|models|setskull|status|test>
+    usage: /aitr <lang|auto|reload|models|setskull|status|test|simulate>
     aliases: [aitranslate, ait]
 
 permissions:
