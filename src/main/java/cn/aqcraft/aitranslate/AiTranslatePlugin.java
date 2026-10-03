@@ -80,7 +80,8 @@ public class AiTranslatePlugin extends JavaPlugin {
                     + " | 模型: " + configManager.getOpenAiModel()
                     + " | 语言数: " + languageManager.getLanguages().size());
             if (configManager.skipDefaultLanguage()) {
-                getLogger().info("提示: skip-default-language=true，默认语言(" + configManager.getDefaultLanguage() + ")的观众会跳过翻译");
+                getLogger().info("提示: skip-default-language=true，仅“跟随客户端语言”的默认语言(" + configManager.getDefaultLanguage()
+                        + ")玩家会跳过翻译；手动选过语言的玩家不受影响");
             }
         }
     }
@@ -273,7 +274,8 @@ public class AiTranslatePlugin extends JavaPlugin {
                 String defaultId = configManager.getDefaultLanguage();
                 sender.sendMessage(PREFIX + "§b模拟消息: §f" + text);
                 sender.sendMessage("§7- 翻译源: §f" + describeProviders(true));
-                sender.sendMessage("§7- skip-default-language: §f" + skipDefault + "§7 | 默认语言: §f" + defaultId);
+                sender.sendMessage("§7- skip-default-language: §f" + skipDefault
+                        + "§7（仅影响跟随客户端语言的玩家）| 默认语言: §f" + defaultId);
                 int shown = 0;
                 for (Player viewer : Bukkit.getOnlinePlayers()) {
                     if (++shown > 15) { sender.sendMessage("§7- ...（其余玩家省略）"); break; }
@@ -286,7 +288,8 @@ public class AiTranslatePlugin extends JavaPlugin {
                     String verdict;
                     if (!translator.hasUsableProvider()) verdict = "§c无可用翻译源 -> 看原文";
                     else if (lang == null) verdict = "§c语言库为空 -> 看原文";
-                    else if (skipDefault && lang.getId().equals(defaultId)) verdict = "§e跳过：默认语言观众 -> 看原文";
+                    else if (skipDefault && !languageManager.hasOverride(viewer.getUniqueId()) && lang.getId().equals(defaultId))
+                        verdict = "§e跳过：跟随客户端的默认语言玩家 -> 看原文（手动选过语言则不跳过）";
                     else verdict = "§a将翻译为 " + lang.getDisplay() + " (" + lang.getId() + ")";
                     sender.sendMessage("§7- §f" + viewer.getName() + " §7[客户端 " + viewer.getLocale()
                             + " -> " + (lang == null ? "?" : lang.getId()) + "] " + verdict);

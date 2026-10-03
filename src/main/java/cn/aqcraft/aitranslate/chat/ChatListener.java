@@ -42,14 +42,17 @@ public class ChatListener implements Listener {
         Language defaultLang = plugin.getLanguageManager().getDefaultLanguage();
         boolean skipDefault = cfg.skipDefaultLanguage() && defaultLang != null;
 
-        // 1. 收集观众需要的语言（排除发送者，de-dup；默认语言观众直接看原文以省费用）
+        // 1. 收集观众需要的语言（排除发送者，de-dup）
+        //    菜单/命令手动选择过语言的观众：永远全量翻译成所选语言，不受跳过设置影响；
+        //    跳过仅作用于“跟随客户端语言”的默认语言观众（省费用）。
         Map<String, Language> needed = new HashMap<>();
         for (Audience audience : event.viewers()) {
             if (!(audience instanceof Player viewer)) continue;
             if (viewer.getUniqueId().equals(sender.getUniqueId())) continue;
             Language lang = plugin.getLanguageManager().resolveFor(viewer);
             if (lang == null) continue;
-            if (skipDefault && lang.getId().equals(defaultLang.getId())) continue;
+            boolean explicit = plugin.getLanguageManager().hasOverride(viewer.getUniqueId());
+            if (skipDefault && !explicit && lang.getId().equals(defaultLang.getId())) continue;
             needed.putIfAbsent(lang.getId(), lang);
         }
         if (needed.isEmpty()) return; // 没有需要翻译的观众
