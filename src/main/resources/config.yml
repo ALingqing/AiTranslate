@@ -1,0 +1,54 @@
+# ============ 清屿 AI 翻译插件 主配置 ============
+
+# --- OpenAI 兼容接口配置 ---
+# 默认已配置好 S3AI API Router（https://docs.furry.vg）
+# 你只需要填 api-key 即可
+openai:
+  # OpenAI 兼容接口地址（Chat Completions 端点，通常以 /v1 结尾）
+  base-url: "https://ai.furry.vg/v1"
+  # 你的 API Key（在 ai.furry.vg 控制台获取），留空则翻译功能禁用
+  api-key: ""
+  # 使用的语言模型 ID（免费模型默认 openai/gpt-5.6-luna）
+  # 注意：可用模型 ID 会随 Key 权限变化，请用 /aitr models 命令或 curl /v1/models 核对
+  # （文档明确要求：模型 ID 不要猜，以 GET /v1/models 返回为准）
+  model: "openai/gpt-5.6-luna"
+  # 请求超时毫秒
+  timeout-ms: 15000
+  # 单条消息最大字符数（超过不翻译，避免爆 token / 成本）
+  max-chars: 400
+
+# --- 翻译行为 ---
+# 每玩家按自己客户端语言（或菜单里选的语言）各自看到译文
+# 发送者自己看原文
+behavior:
+  # 是否启用插件
+  enabled: true
+  # 翻译时保留颜色/格式/物品 hover
+  keep-formatting: true
+  # 是否翻译聊天里的物品名与 lore（hover 展示）
+  translate-items: true
+  # 是否在译文后附带小括号原文（显示成本更高，一般关）
+  show-original-brackets: false
+  # 默认语言（见底部 default-language）的观众跳过翻译、直接看原文，可省 AI 费用。
+  # 若希望中文玩家也能看到外语聊天消息的中文译文，改为 false 即可。
+  skip-default-language: true
+  # 一条消息最多等待 AI 翻译多少毫秒，超时后未完成的部分直接显示原文。
+  # 聊天格式（玩家名、前缀）沿用服务器当前 ChatRenderer（兼容其他聊天插件）。
+  max-wait-ms: 8000
+
+# --- 缓存 ---
+# 只做内存缓存（重启即清）
+cache:
+  # 每个"语言 x 文本"组合最多缓存多少条
+  max-size-per-language: 2000
+
+# --- 线程池 ---
+# 发一条消息给多个不同语言的观众时，会并发请求 AI。
+# 太大可能打到中转限流，太小则多人不同语言时慢。
+threads:
+  max-parallel-requests: 4
+
+# --- 语言相关 ---
+# 兜底语言：当检测不到观众的客户端语言、或该语言未配置时用
+default-language: zh_cn
+# 具体语言列表 / 提示词 / 国旗见插件目录 languages.yml（内置 64 种语言，可自行增删）

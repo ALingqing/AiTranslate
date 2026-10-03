@@ -1,0 +1,505 @@
+# ============ 语言配置 ============
+# 每种语言 = 一个玩家可选择的目标语言。
+# 玩家发送消息时，会按"观众的客户端语言"或"观众在菜单里选的语言"
+# 找到最匹配的 language，用该语言专属的 prompt 让 AI 翻译，再发给该观众。
+#
+# 字段说明：
+#   display   : 菜单里显示的语言名
+#   flag-name : 菜单材质（用于国旗占位，可填任意物品名如 RED_CONCRETE）
+#   skull     : 国旗头颅纹理（可选）。支持两种写法：
+#               ① 纹理 URL，如 http://textures.minecraft.net/texture/xxxxx
+#               ② 头颅库网站复制的 base64 纹理值（ eyJ0ZXh0dXJlcyI6... ）
+#               不填则回退用 flag-name 的染色方块。
+#               管理员也可以手持头颅用 /aitr setskull <语言id> 自动写入。
+#   locales   : 匹配的客户端 locale（小写，下划线）。玩家客户端语言命中这里任意一个即用该语言。
+#               getLocale() 返回如 en_us / zh_cn / ja_jp / ko_kr / fr_fr ...
+#   skip-regex: 可选。若整条消息纯文本完全匹配该正则，则视为"已经是该语言"，
+#               跳过 AI 调用（省钱、更快）。纯数字/纯链接也会自动跳过。
+#   prompt    : 该语言专属的 AI 系统提示词。'{text}' 会被替换为待翻译的原文。
+#
+# 提示词写得好坏直接影响翻译质量，请按需修改。
+# 本文件内置 64 种语言；新增语言：复制任意条目，修改 id / display / locales / prompt 即可。
+# 注意：更新插件后不会自动覆盖旧的 languages.yml；如需重新生成，删除该文件后重启服务器。
+
+languages:
+  zh_cn:
+    display: "简体中文"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["zh_cn"]
+    skip-regex: '^[\u4e00-\u9fff\s\d\p{P}\p{S}]*$'
+    prompt: "你是一名专业的游戏聊天翻译。请把玩家在《我的世界》公屏发送的消息原文翻译成简体中文。只输出翻译结果，不要添加任何解释、引号、前缀或额外文字，直接输出译文。若原文本身是简体中文，原样返回。原文如下：\n{text}"
+
+  zh_tw:
+    display: "繁體中文"
+    flag-name: "ORANGE_CONCRETE"
+    skull: ""
+    locales: ["zh_tw", "zh_hk"]
+    skip-regex: '^[\u4e00-\u9fff\s\d\p{P}\p{S}]*$'
+    prompt: "你是一名专业的游戏聊天翻译。请把玩家在《我的世界》公屏发送的消息原文翻译成繁體中文（台灣用語）。只輸出翻譯結果，不要添加任何解釋、引號、前綴或額外文字，直接輸出譯文。若原文本身是繁體中文，原樣返回。原文如下：\n{text}"
+
+  en_us:
+    display: "English"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["en_us", "en_gb", "en_ca", "en_au", "en_nz"]
+    # 纯 ASCII（可打印字符）视为已是英文；若不想跳过，删掉这一行即可
+    skip-regex: '^[\x20-\x7E\s]*$'
+    prompt: "You are a professional game chat translator for Minecraft. Translate the player's public chat message into natural, fluent English. Output ONLY the translation with no explanation, quotes, prefix, or extra text. If the original is already English, return it unchanged. Original message:\n{text}"
+
+  ja_jp:
+    display: "日本語"
+    flag-name: "WHITE_CONCRETE"
+    skull: ""
+    locales: ["ja_jp"]
+    skip-regex: '^[\u3040-\u30ff\u4e00-\u9fff\s\d\p{P}\p{S}]*$'
+    prompt: "あなたはマインクラフトのゲームチャット翻訳者です。プレイヤーの公開チャットメッセージを自然な日本語に翻訳してください。説明や引用符、接頭辞などの余計な文字は付けず、翻訳結果のみをそのまま出力してください。原文が既に日本語の場合はそのまま返してください。原文：\n{text}"
+
+  ko_kr:
+    display: "한국어"
+    flag-name: "CYAN_CONCRETE"
+    skull: ""
+    locales: ["ko_kr"]
+    skip-regex: '^[\uac00-\ud7af\u1100-\u11ff\u3130-\u318f\u4e00-\u9fff\s\d\p{P}\p{S}]*$'
+    prompt: "당신은 마인크래프트 게임 채팅 전문 번역가입니다. 플레이어의 공개 채팅 메시지를 자연스러운 한국어로 번역하세요. 설명, 따옴표, 접두사 등 추가 텍스트 없이 번역 결과만 출력하세요. 원문이 이미 한국어라면 그대로 반환하세요.\n원문:\n{text}"
+
+  fr_fr:
+    display: "Français"
+    flag-name: "LIGHT_BLUE_CONCRETE"
+    skull: ""
+    locales: ["fr_fr", "fr_ca"]
+    prompt: "Vous êtes un traducteur professionnel de chat de jeu Minecraft. Traduisez le message public du joueur en français naturel et fluide. Sortez UNIQUEMENT la traduction, sans explication, guillemets, préfixe ou texte supplémentaire. Si l'original est déjà en français, renvoyez-le tel quel.\nMessage original :\n{text}"
+
+  de_de:
+    display: "Deutsch"
+    flag-name: "BLACK_CONCRETE"
+    skull: ""
+    locales: ["de_de"]
+    prompt: "Du bist ein professioneller Übersetzer für Minecraft-Spiele-Chat. Übersetze die öffentliche Chatnachricht des Spielers in natürliches, flüssiges Deutsch. Gib NUR die Übersetzung aus, ohne Erklärung, Anführungszeichen, Präfix oder zusätzlichen Text. Wenn das Original bereits Deutsch ist, gib es unverändert zurück.\nOriginalnachricht:\n{text}"
+
+  es_es:
+    display: "Español"
+    flag-name: "YELLOW_CONCRETE"
+    skull: ""
+    locales: ["es_es", "es_mx", "es_ar"]
+    prompt: "Eres un traductor profesional de chat de Minecraft. Traduce el mensaje público del jugador al español natural. Muestra SOLO la traducción, sin explicación, comillas, prefijo ni texto adicional. Si el original ya está en español, devuélvelo tal cual.\nMensaje original:\n{text}"
+
+  pt_br:
+    display: "Português"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["pt_br", "pt_pt"]
+    prompt: "Você é um tradutor profissional de chat de Minecraft. Traduza a mensagem pública do jogador para o português natural. Produza SOMENTE a tradução, sem explicação, aspas, prefixo ou texto extra. Se o original já estiver em português, devolva-o como está.\nMensagem original:\n{text}"
+
+  ru_ru:
+    display: "Русский"
+    flag-name: "MAGENTA_CONCRETE"
+    skull: ""
+    locales: ["ru_ru"]
+    skip-regex: '^[\u0400-\u04ff\s\d\p{P}\p{S}]*$'
+    prompt: "Вы профессиональный переводчик игрового чата Minecraft. Переведите публичное сообщение игрока на естественный русский язык. Выводите ТОЛЬКО перевод, без пояснений, кавычек, префиксов или дополнительного текста. Если исходный текст уже на русском, верните его без изменений.\nИсходное сообщение:\n{text}"
+
+  uk_ua:
+    display: "Українська"
+    flag-name: "LIGHT_BLUE_CONCRETE"
+    skull: ""
+    locales: ["uk_ua"]
+    skip-regex: '^[\u0400-\u04ff\s\d\p{P}\p{S}]*$'
+    prompt: "Ви професійний перекладач ігрового чату Minecraft. Перекладіть повідомлення гравця природною українською мовою. Виводьте ЛИШЕ переклад, без пояснень, лапок чи додаткового тексту. Якщо текст уже українською, поверніть його без змін.\n{text}"
+
+  it_it:
+    display: "Italiano"
+    flag-name: "LIME_CONCRETE"
+    skull: ""
+    locales: ["it_it", "it_ch"]
+    prompt: "Sei un traduttore professionista per la chat di Minecraft. Traduci il messaggio del giocatore in italiano naturale. Restituisci SOLO la traduzione, senza spiegazioni, virgolette o testo aggiuntivo. Se il testo è già in italiano, restituiscilo invariato.\n{text}"
+
+  nl_nl:
+    display: "Nederlands"
+    flag-name: "ORANGE_CONCRETE"
+    skull: ""
+    locales: ["nl_nl", "nl_be"]
+    prompt: "Je bent een professionele vertaler voor Minecraft-chat. Vertaal het bericht van de speler naar natuurlijk Nederlands. Geef ALLEEN de vertaling weer, zonder uitleg, aanhalingstekens of extra tekst. Als de tekst al Nederlands is, geef die ongewijzigd terug.\n{text}"
+
+  pl_pl:
+    display: "Polski"
+    flag-name: "WHITE_CONCRETE"
+    skull: ""
+    locales: ["pl_pl"]
+    prompt: "Jesteś profesjonalnym tłumaczem czatu Minecraft. Przetłumacz wiadomość gracza na naturalny polski. Podaj TYLKO tłumaczenie, bez wyjaśnień, cudzysłowów ani dodatkowego tekstu. Jeśli tekst jest już po polsku, zwróć go bez zmian.\n{text}"
+
+  tr_tr:
+    display: "Türkçe"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["tr_tr"]
+    prompt: "Minecraft sohbeti için profesyonel bir çevirmensin. Oyuncunun mesajını doğal Türkçeye çevir. Yalnızca çeviriyi yaz; açıklama, tırnak veya ek metin ekleme. Metin zaten Türkçeyse olduğu gibi döndür.\n{text}"
+
+  vi_vn:
+    display: "Tiếng Việt"
+    flag-name: "YELLOW_CONCRETE"
+    skull: ""
+    locales: ["vi_vn"]
+    prompt: "Bạn là một dịch giả chuyên nghiệp cho trò chuyện trong Minecraft. Hãy dịch tin nhắn của người chơi sang tiếng Việt tự nhiên. Chỉ xuất bản dịch, không thêm giải thích, dấu ngoặc kép hay văn bản nào khác. Nếu văn bản đã là tiếng Việt, hãy giữ nguyên.\n{text}"
+
+  th_th:
+    display: "ไทย"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["th_th"]
+    skip-regex: '^[\u0e00-\u0e7f\s\d\p{P}\p{S}]*$'
+    prompt: "คุณเป็นนักแปลมืออาชีพสำหรับแชท Minecraft แปลข้อความของผู้เล่นเป็นภาษาไทยที่เป็นธรรมชาติ ส่งออกเฉพาะคำแปลเท่านั้น ไม่ต้องมีคำอธิบาย เครื่องหมายคำพูด หรือข้อความเพิ่มเติม หากข้อความต้นฉบับเป็นภาษาไทยอยู่แล้ว ให้ส่งกลับตามเดิม\n{text}"
+
+  id_id:
+    display: "Bahasa Indonesia"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["id_id"]
+    prompt: "Anda adalah penerjemah profesional untuk obrolan Minecraft. Terjemahkan pesan pemain ke bahasa Indonesia yang alami. Keluarkan HANYA terjemahannya, tanpa penjelasan, tanda kutip, atau teks tambahan. Jika teks sudah dalam bahasa Indonesia, kembalikan apa adanya.\n{text}"
+
+  ar_sa:
+    display: "العربية"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["ar_sa", "ar_eg", "ar_ae", "ar_kw", "ar_iq", "ar_dz", "ar_ma", "ar_tn", "ar_jo", "ar_sy", "ar_ye"]
+    skip-regex: '^[\u0600-\u06ff\u0750-\u077f\s\d\p{P}\p{S}]*$'
+    prompt: "أنت مترجم محترف لدردشة ماينكرافت. ترجم رسالة اللاعب إلى العربية بشكل طبيعي. أخرج الترجمة فقط دون أي شرح أو علامات اقتباس أو نص إضافي. إذا كان النص بالعربية أصلاً فأرجعه كما هو.\n{text}"
+
+  hi_in:
+    display: "हिन्दी"
+    flag-name: "ORANGE_CONCRETE"
+    skull: ""
+    locales: ["hi_in"]
+    skip-regex: '^[\u0900-\u097f\s\d\p{P}\p{S}]*$'
+    prompt: "आप Minecraft चैट के लिए एक पेशेवर अनुवादक हैं। खिलाड़ी के संदेश का स्वाभाविक हिंदी में अनुवाद करें। केवल अनुवाद लौटाएँ, कोई व्याख्या, उद्धरण चिह्न या अतिरिक्त पाठ न जोड़ें। यदि पाठ पहले से हिंदी में है तो उसे वैसे ही लौटाएँ।\n{text}"
+
+  fa_ir:
+    display: "فارسی"
+    flag-name: "CYAN_CONCRETE"
+    skull: ""
+    locales: ["fa_ir"]
+    skip-regex: '^[\u0600-\u06ff\u0750-\u077f\s\d\p{P}\p{S}]*$'
+    prompt: "شما یک مترجم حرفه‌ای برای چت ماینکرفت هستید. پیام بازیکن را به فارسی طبیعی ترجمه کنید. فقط ترجمه را بدون توضیح، نقل‌قول یا متن اضافی خروجی دهید. اگر متن از قبل فارسی است، آن را بدون تغییر برگردانید.\n{text}"
+
+  he_il:
+    display: "עברית"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["he_il"]
+    skip-regex: '^[\u0590-\u05ff\s\d\p{P}\p{S}]*$'
+    prompt: "אתה מתרגם מקצועי לצ׳אט של Minecraft. תרגם את הודעת השחקן לעברית טבעית. החזר רק את התרגום, בלי הסברים, מרכאות או טקסט נוסף. אם הטקסט כבר בעברית, החזר אותו ללא שינוי.\n{text}"
+
+  el_gr:
+    display: "Ελληνικά"
+    flag-name: "LIGHT_BLUE_CONCRETE"
+    skull: ""
+    locales: ["el_gr"]
+    skip-regex: '^[\u0370-\u03ff\s\d\p{P}\p{S}]*$'
+    prompt: "Είσαι επαγγελματίας μεταφραστής για συνομιλίες Minecraft. Μετάφρασε το μήνυμα του παίκτη στα φυσικά ελληνικά. Εμφάνισε ΜΟΝΟ τη μετάφραση, χωρίς εξηγήσεις, εισαγωγικά ή επιπλέον κείμενο. Αν το κείμενο είναι ήδη στα ελληνικά, επέστρεψέ το ως έχει.\n{text}"
+
+  sv_se:
+    display: "Svenska"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["sv_se"]
+    prompt: "Du är en professionell översättare för Minecraft-chatt. Översätt spelarens meddelande till naturlig svenska. Skriv ENDAST översättningen, utan förklaringar, citattecken eller extra text. Om texten redan är på svenska, returnera den oförändrad.\n{text}"
+
+  da_dk:
+    display: "Dansk"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["da_dk"]
+    prompt: "Du er en professionel oversætter til Minecraft-chat. Oversæt spillerens besked til naturligt dansk. Giv KUN oversættelsen, uden forklaringer, anførselstegn eller ekstra tekst. Hvis teksten allerede er på dansk, returnér den uændret.\n{text}"
+
+  nb_no:
+    display: "Norsk"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["nb_no", "nn_no"]
+    prompt: "Du er en profesjonell oversetter for Minecraft-chat. Oversett spillerens melding til naturlig norsk. Skriv KUN oversettelsen, uten forklaringer, anførselstegn eller ekstra tekst. Hvis teksten allerede er på norsk, returner den uendret.\n{text}"
+
+  fi_fi:
+    display: "Suomi"
+    flag-name: "WHITE_CONCRETE"
+    skull: ""
+    locales: ["fi_fi"]
+    prompt: "Olet ammattimainen Minecraft-chatin kääntäjä. Käännä pelaajan viesti luonnolliselle suomelle. Tulosta VAIN käännös ilman selityksiä, lainausmerkkejä tai ylimääräistä tekstiä. Jos teksti on jo suomeksi, palauta se muuttumattomana.\n{text}"
+
+  cs_cz:
+    display: "Čeština"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["cs_cz"]
+    prompt: "Jste profesionální překladatel pro chat v Minecraftu. Přeložte zprávu hráče do přirozené češtiny. Vypište POUZE překlad, bez vysvětlení, uvozovek nebo dalšího textu. Pokud je text již v češtině, vraťte jej beze změny.\n{text}"
+
+  hu_hu:
+    display: "Magyar"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["hu_hu"]
+    prompt: "Ön egy professzionális fordító Minecraft csevegéshez. Fordítsa le a játékos üzenetét természetes magyarra. CSAK a fordítást adja ki, magyarázat, idézőjelek vagy extra szöveg nélkül. Ha a szöveg már magyar, változatlanul adja vissza.\n{text}"
+
+  ro_ro:
+    display: "Română"
+    flag-name: "YELLOW_CONCRETE"
+    skull: ""
+    locales: ["ro_ro", "ro_md"]
+    prompt: "Ești un traducător profesionist pentru chatul din Minecraft. Tradu mesajul jucătorului în română naturală. Afișează DOAR traducerea, fără explicații, ghilimele sau text suplimentar. Dacă textul este deja în română, returnează-l neschimbat.\n{text}"
+
+  sk_sk:
+    display: "Slovenčina"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["sk_sk"]
+    prompt: "Ste profesionálny prekladateľ pre chat v Minecrafte. Preložte správu hráča do prirodzenej slovenčiny. Vypíšte LEN preklad, bez vysvetlení, úvodzoviek alebo ďalšieho textu. Ak je text už v slovenčine, vráťte ho nezmenený.\n{text}"
+
+  bg_bg:
+    display: "Български"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["bg_bg"]
+    skip-regex: '^[\u0400-\u04ff\s\d\p{P}\p{S}]*$'
+    prompt: "Вие сте професионален преводач за чата в Minecraft. Преведете съобщението на играча на естествен български. Изведете САМО превода, без обяснения, кавички или допълнителен текст. Ако текстът вече е на български, върнете го непроменен.\n{text}"
+
+  sr_rs:
+    display: "Српски"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["sr_rs"]
+    skip-regex: '^[\u0400-\u04ff\s\d\p{P}\p{S}]*$'
+    prompt: "Ви сте професионални преводилац за Minecraft ћаскање. Преведите поруку играча на природни српски. Прикажите САМО превод, без објашњења, наводника или додатног текста. Ако је текст већ на српском, вратите га непромењен.\n{text}"
+
+  hr_hr:
+    display: "Hrvatski"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["hr_hr"]
+    prompt: "Vi ste profesionalni prevoditelj za Minecraft chat. Prevedite igračevu poruku na prirodni hrvatski. Prikažite SAMO prijevod, bez objašnjenja, navodnika ili dodatnog teksta. Ako je tekst već na hrvatskom, vratite ga nepromijenjenog.\n{text}"
+
+  lt_lt:
+    display: "Lietuvių"
+    flag-name: "YELLOW_CONCRETE"
+    skull: ""
+    locales: ["lt_lt"]
+    prompt: "Esate profesionalus Minecraft pokalbių vertėjas. Išverskite žaidėjo žinutę į natūralią lietuvių kalbą. Pateikite TIK vertimą, be paaiškinimų, kabučių ar papildomo teksto. Jei tekstas jau yra lietuviškai, grąžinkite jį nepakeistą.\n{text}"
+
+  lv_lv:
+    display: "Latviešu"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["lv_lv"]
+    prompt: "Jūs esat profesionāls Minecraft tērzēšanas tulks. Tulkot spēlētāja ziņojumu dabiskā latviešu valodā. Izvadiet TIKAI tulkojumu bez paskaidrojumiem, pēdiņām vai papildu teksta. Ja teksts jau ir latviešu valodā, atgrieziet to nemainītu.\n{text}"
+
+  et_ee:
+    display: "Eesti"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["et_ee"]
+    prompt: "Olete Minecraft vestluse professionaalne tõlkija. Tõlkige mängija sõnum loomulikku eesti keelde. Väljastage AINULT tõlge, ilma selgituste, jutumärkide või lisatekstita. Kui tekst on juba eesti keeles, tagastage see muutmata kujul.\n{text}"
+
+  sl_si:
+    display: "Slovenščina"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["sl_si"]
+    prompt: "Ste profesionalni prevajalec za Minecraft klepet. Prevedite igralčevo sporočilo v naravno slovenščino. Izpišite SAMO prevod, brez pojasnil, narekovajev ali dodatnega besedila. Če je besedilo že v slovenščini, ga vrnite nespremenjenega.\n{text}"
+
+  ca_es:
+    display: "Català"
+    flag-name: "YELLOW_CONCRETE"
+    skull: ""
+    locales: ["ca_es"]
+    prompt: "Ets un traductor professional del xat de Minecraft. Tradueix el missatge del jugador al català natural. Mostra NOMÉS la traducció, sense explicacions, cometes ni text addicional. Si el text ja és en català, retorna'l sense canvis.\n{text}"
+
+  af_za:
+    display: "Afrikaans"
+    flag-name: "ORANGE_CONCRETE"
+    skull: ""
+    locales: ["af_za"]
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Afrikaans naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Afrikaans, return it unchanged.\n{text}"
+
+  sw_ke:
+    display: "Kiswahili"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["sw_ke", "sw_tz"]
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Swahili naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Swahili, return it unchanged.\n{text}"
+
+  ms_my:
+    display: "Bahasa Melayu"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["ms_my"]
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Malay naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Malay, return it unchanged.\n{text}"
+
+  fil_ph:
+    display: "Filipino"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["fil_ph", "tl_ph"]
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Filipino naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Filipino, return it unchanged.\n{text}"
+
+  bn_bd:
+    display: "বাংলা"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["bn_bd", "bn_in"]
+    skip-regex: '^[\u0980-\u09ff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Bengali naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Bengali, return it unchanged.\n{text}"
+
+  ta_in:
+    display: "தமிழ்"
+    flag-name: "ORANGE_CONCRETE"
+    skull: ""
+    locales: ["ta_in", "ta_lk"]
+    skip-regex: '^[\u0b80-\u0bff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Tamil naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Tamil, return it unchanged.\n{text}"
+
+  te_in:
+    display: "తెలుగు"
+    flag-name: "YELLOW_CONCRETE"
+    skull: ""
+    locales: ["te_in"]
+    skip-regex: '^[\u0c00-\u0c7f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Telugu naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Telugu, return it unchanged.\n{text}"
+
+  ml_in:
+    display: "മലയാളം"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["ml_in"]
+    skip-regex: '^[\u0d00-\u0d7f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Malayalam naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Malayalam, return it unchanged.\n{text}"
+
+  kn_in:
+    display: "ಕನ್ನಡ"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["kn_in"]
+    skip-regex: '^[\u0c80-\u0cff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Kannada naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Kannada, return it unchanged.\n{text}"
+
+  gu_in:
+    display: "ગુજરાતી"
+    flag-name: "LIGHT_BLUE_CONCRETE"
+    skull: ""
+    locales: ["gu_in"]
+    skip-regex: '^[\u0a80-\u0aff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Gujarati naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Gujarati, return it unchanged.\n{text}"
+
+  mr_in:
+    display: "मराठी"
+    flag-name: "ORANGE_CONCRETE"
+    skull: ""
+    locales: ["mr_in"]
+    skip-regex: '^[\u0900-\u097f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Marathi naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Marathi, return it unchanged.\n{text}"
+
+  ne_np:
+    display: "नेपाली"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["ne_np"]
+    skip-regex: '^[\u0900-\u097f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Nepali naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Nepali, return it unchanged.\n{text}"
+
+  si_lk:
+    display: "සිංහල"
+    flag-name: "ORANGE_CONCRETE"
+    skull: ""
+    locales: ["si_lk"]
+    skip-regex: '^[\u0d80-\u0dff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Sinhala naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Sinhala, return it unchanged.\n{text}"
+
+  km_kh:
+    display: "ខ្មែរ"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["km_kh"]
+    skip-regex: '^[\u1780-\u17ff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Khmer naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Khmer, return it unchanged.\n{text}"
+
+  lo_la:
+    display: "ລາວ"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["lo_la"]
+    skip-regex: '^[\u0e80-\u0eff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Lao naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Lao, return it unchanged.\n{text}"
+
+  my_mm:
+    display: "မြန်မာ"
+    flag-name: "YELLOW_CONCRETE"
+    skull: ""
+    locales: ["my_mm"]
+    skip-regex: '^[\u1000-\u109f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Burmese naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Burmese, return it unchanged.\n{text}"
+
+  ka_ge:
+    display: "ქართული"
+    flag-name: "WHITE_CONCRETE"
+    skull: ""
+    locales: ["ka_ge"]
+    skip-regex: '^[\u10a0-\u10ff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Georgian naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Georgian, return it unchanged.\n{text}"
+
+  hy_am:
+    display: "Հայերեն"
+    flag-name: "RED_CONCRETE"
+    skull: ""
+    locales: ["hy_am"]
+    skip-regex: '^[\u0530-\u058f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Armenian naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Armenian, return it unchanged.\n{text}"
+
+  az_az:
+    display: "Azərbaycan"
+    flag-name: "CYAN_CONCRETE"
+    skull: ""
+    locales: ["az_az"]
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Azerbaijani naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Azerbaijani, return it unchanged.\n{text}"
+
+  kk_kz:
+    display: "Қазақша"
+    flag-name: "LIGHT_BLUE_CONCRETE"
+    skull: ""
+    locales: ["kk_kz"]
+    skip-regex: '^[\u0400-\u04ff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Kazakh naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Kazakh, return it unchanged.\n{text}"
+
+  uz_uz:
+    display: "Oʻzbekcha"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["uz_uz"]
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Uzbek naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Uzbek, return it unchanged.\n{text}"
+
+  mn_mn:
+    display: "Монгол"
+    flag-name: "BLUE_CONCRETE"
+    skull: ""
+    locales: ["mn_mn"]
+    skip-regex: '^[\u0400-\u04ff\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Mongolian naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Mongolian, return it unchanged.\n{text}"
+
+  ur_pk:
+    display: "اردو"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["ur_pk", "ur_in"]
+    skip-regex: '^[\u0600-\u06ff\u0750-\u077f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Urdu naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Urdu, return it unchanged.\n{text}"
+
+  am_et:
+    display: "አማርኛ"
+    flag-name: "GREEN_CONCRETE"
+    skull: ""
+    locales: ["am_et"]
+    skip-regex: '^[\u1200-\u137f\s\d\p{P}\p{S}]*$'
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Amharic naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Amharic, return it unchanged.\n{text}"
+
+  is_is:
+    display: "Íslenska"
+    flag-name: "WHITE_CONCRETE"
+    skull: ""
+    locales: ["is_is"]
+    prompt: "You are a professional translator for the game Minecraft. Translate the in-game text into Icelandic naturally and idiomatically. Output ONLY the translation, with no explanation, quotes, or extra text. If the text is already in Icelandic, return it unchanged.\n{text}"

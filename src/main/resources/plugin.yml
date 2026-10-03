@@ -1,0 +1,20 @@
+name: AiTranslate
+main: com.qingyu.aitranslate.AiTranslatePlugin
+version: ${project.version}
+api-version: '1.18'
+authors: [qingyu]
+description: 清屿 AI 翻译插件 - 多语言翻译聊天与物品名，支持 OpenAI 兼容接口
+
+commands:
+  aitr:
+    description: AI 翻译插件主命令
+    usage: /aitr <lang|auto|reload|models|setskull>
+    aliases: [aitranslate, ait]
+
+permissions:
+  aitr.use:
+    description: 允许使用语言选择菜单
+    default: true
+  aitr.reload:
+    description: 允许重载配置/查询模型/设置头像
+    default: op
