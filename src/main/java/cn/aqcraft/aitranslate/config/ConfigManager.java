@@ -52,8 +52,8 @@ public class ConfigManager {
     public boolean keepFormatting() { return config.getBoolean("behavior.keep-formatting", true); }
     public boolean translateItems() { return config.getBoolean("behavior.translate-items", true); }
     public boolean showOriginalBrackets() { return config.getBoolean("behavior.show-original-brackets", false); }
-    /** 目标语言 == 默认语言时跳过翻译（显示原文），默认开启以节省费用 */
-    public boolean skipDefaultLanguage() { return config.getBoolean("behavior.skip-default-language", true); }
+    /** 目标语言 == 默认语言时跳过翻译（显示原文）；默认关闭，中文玩家也能看到外语消息的译文 */
+    public boolean skipDefaultLanguage() { return config.getBoolean("behavior.skip-default-language", false); }
     public long getMaxWaitMs() { return Math.max(1000L, config.getLong("behavior.max-wait-ms", 8000L)); }
 
     public int getCacheMaxSizePerLanguage() { return config.getInt("cache.max-size-per-language", 2000); }

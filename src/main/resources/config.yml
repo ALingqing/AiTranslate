@@ -29,9 +29,10 @@ behavior:
   translate-items: true
   # 是否在译文后附带小括号原文（显示成本更高，一般关）
   show-original-brackets: false
-  # 默认语言（见底部 default-language）的观众跳过翻译、直接看原文，可省 AI 费用。
-  # 若希望中文玩家也能看到外语聊天消息的中文译文，改为 false 即可。
-  skip-default-language: true
+  # 默认语言（见底部 default-language）的观众是否跳过翻译、直接看原文。
+  # false（默认）= 中文玩家也能看到外语消息的中文译文；
+  # true = 中文玩家看原文（省 AI 费用，但外语消息也不会被翻成中文）。
+  skip-default-language: false
   # 一条消息最多等待 AI 翻译多少毫秒，超时后未完成的部分直接显示原文。
   # 聊天格式（玩家名、前缀）沿用服务器当前 ChatRenderer（兼容其他聊天插件）。
   max-wait-ms: 8000

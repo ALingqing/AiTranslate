@@ -4,6 +4,7 @@ import cn.aqcraft.aitranslate.chat.ChatListener;
 import cn.aqcraft.aitranslate.chat.ComponentTranslator;
 import cn.aqcraft.aitranslate.config.ConfigManager;
 import cn.aqcraft.aitranslate.gui.LanguageMenu;
+import cn.aqcraft.aitranslate.lang.Language;
 import cn.aqcraft.aitranslate.lang.LanguageManager;
 import cn.aqcraft.aitranslate.translate.TranslationCache;
 import cn.aqcraft.aitranslate.translate.Translator;
@@ -18,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -94,7 +96,7 @@ public class AiTranslatePlugin extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(PREFIX + "用法: /" + label + " <lang|auto|reload|models|setskull>");
+                sender.sendMessage(PREFIX + "用法: /" + label + " <lang|auto|reload|models|setskull|status|test>");
                 return true;
             }
             if (!player.hasPermission("aitr.use")) {
@@ -204,8 +206,56 @@ public class AiTranslatePlugin extends JavaPlugin {
                 player.sendMessage(PREFIX + "已将 §a" + id + "§r 的国旗头颅设为: §7" + url);
                 return true;
             }
+            case "status" -> {
+                sender.sendMessage(PREFIX + "§b状态");
+                sender.sendMessage("§7- 启用: §f" + configManager.isEnabled()
+                        + "§7 | api-key: " + (translator.isApiKeyMissing() ? "§c未配置" : "§a已配置"));
+                sender.sendMessage("§7- 接口: §f" + configManager.getOpenAiBaseUrl());
+                sender.sendMessage("§7- 模型: §f" + configManager.getOpenAiModel());
+                sender.sendMessage("§7- 默认语言: §f" + configManager.getDefaultLanguage()
+                        + "§7 | 跳过默认语言: §f" + configManager.skipDefaultLanguage());
+                if (sender instanceof Player player) {
+                    Language lang = languageManager.resolveFor(player);
+                    sender.sendMessage("§7- 你的客户端: §f" + player.getLocale() + "§7 -> 解析语言: §f"
+                            + (lang == null ? "无" : lang.getDisplay() + " (" + lang.getId() + ")")
+                            + "§7 | 菜单覆盖: §f" + (languageManager.hasOverride(player.getUniqueId()) ? "是" : "否"));
+                }
+                sender.sendMessage("§7- 缓存: §f" + cache.size() + " §7条 | 并发上限: §f" + configManager.getMaxParallelRequests());
+                return true;
+            }
+            case "test" -> {
+                if (!sender.hasPermission("aitr.reload")) {
+                    sender.sendMessage(PREFIX + "§c你没有权限执行该命令");
+                    return true;
+                }
+                String text = args.length > 1 ? String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                        : "Hello, welcome to the server!";
+                Language target = (sender instanceof Player player)
+                        ? languageManager.resolveFor(player) : languageManager.getDefaultLanguage();
+                if (target == null) {
+                    sender.sendMessage(PREFIX + "§c语言库为空，无法测试");
+                    return true;
+                }
+                final Translator snapshot = translator;
+                sender.sendMessage(PREFIX + "§7测试翻译 -> §f" + target.getDisplay() + " (" + target.getId() + ") §7...");
+                Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                    long t0 = System.currentTimeMillis();
+                    String result = snapshot.testCall(text, target);
+                    long ms = System.currentTimeMillis() - t0;
+                    String err = snapshot.getLastError();
+                    Bukkit.getScheduler().runTask(this, () -> {
+                        sender.sendMessage(PREFIX + "§7原文: §f" + text);
+                        if (result != null && !result.isEmpty()) {
+                            sender.sendMessage(PREFIX + "§7译文: §a" + result + " §8(" + ms + "ms)");
+                        } else {
+                            sender.sendMessage(PREFIX + "§c翻译失败: " + (err == null ? "未知原因" : err));
+                        }
+                    });
+                });
+                return true;
+            }
             default -> {
-                sender.sendMessage(PREFIX + "命令: /" + label + " <lang|auto|reload|models|setskull>");
+                sender.sendMessage(PREFIX + "命令: /" + label + " <lang|auto|reload|models|setskull|status|test>");
                 return true;
             }
         }

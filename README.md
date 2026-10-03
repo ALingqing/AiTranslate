@@ -21,7 +21,7 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 - 自动检测：跟随玩家客户端语言（locale）自动匹配；也可在国旗菜单或命令中手动指定
 - 保留格式：翻译保留颜色代码与组件结构；聊天前缀与名字格式沿用服务器当前渲染器，兼容其他聊天插件
 - 物品翻译：聊天内展示物品（hover）的名称与 lore 一并翻译
-- 默认语言跳过：默认语言（默认简体中文）的玩家直接看原文，可配置，能明显节省 AI 费用
+- 默认语言可跳过：可让默认语言（中文）的观众直接看原文以省费用（默认关闭）
 - 智能跳过：纯数字、纯符号、纯链接自动跳过；可按语言配置正则，跳过“原文已经是该语言”的消息
 - 缓存与限流：内存翻译缓存 + 并发上限，避免打爆中转接口
 - 异步处理：AI 请求全部在线程池中执行，不阻塞服务器主线程，超时自动回退原文
@@ -61,6 +61,8 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 | `/aitr reload` | 重载配置与语言库 | `aitr.reload`（默认 OP） |
 | `/aitr models` | 查询当前 Key 可用模型 | `aitr.reload` |
 | `/aitr setskull <语言id>` | 手持头颅设为该语言国旗图标 | `aitr.reload` |
+| `/aitr status` | 查看插件状态（Key、模型、你的语言解析、缓存等） | 所有玩家 |
+| `/aitr test [文本]` | 立即测试一次翻译接口，显示译文或失败原因 | `aitr.reload` |
 
 ## 配置说明
 
@@ -75,7 +77,7 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 | `openai.max-chars` | `400` | 超过该长度的消息不翻译 |
 | `behavior.enabled` | `true` | 总开关 |
 | `behavior.translate-items` | `true` | 是否翻译聊天内物品名与 lore |
-| `behavior.skip-default-language` | `true` | 默认语言观众跳过翻译（省费用） |
+| `behavior.skip-default-language` | `false` | 目标语言等于默认语言的观众跳过翻译；`true` 省费用但中文玩家看不到外语消息译文 |
 | `behavior.max-wait-ms` | `8000` | 单条消息最多等待译文的时间，超时回退原文 |
 | `cache.max-size-per-language` | `2000` | 每种语言的缓存条目上限 |
 | `threads.max-parallel-requests` | `4` | AI 并发请求上限 |
@@ -102,6 +104,19 @@ AiTranslate 是一个面向 Paper 服务端的 Minecraft 多语言 AI 翻译插�
 - 聊天内物品展示：翻译物品自定义名与 lore
 - 聊天格式：沿用服务器当前 `ChatRenderer`，尽量保留其他插件设置的前缀与颜色
 - 其他插件直接发送的独立提示（不经过聊天事件的 `sendMessage` / 广播、计分板、独立 GUI 文本等）：受服务端事件能力限制无法统一拦截，如需支持需要数据包层拦截方案，欢迎在 Issues 中讨论
+
+## 常见问题
+
+### 为什么聊天没有翻译
+
+按顺序排查：
+
+1. 执行 `/aitr status`：若 `api-key` 显示未配置，翻译完全不工作。编辑 `plugins/AiTranslate/config.yml` 填入 `openai.api-key` 后执行 `/aitr reload`
+2. 执行 `/aitr test 你好`：能看到译文说明 AI 接口正常，问题在聊天接收环节；显示失败原因（HTTP 401、模型不存在、超时等）则按提示检查 Key、模型 ID、网络
+3. 自己发送的消息自己永远看到原文（设计如此），请用第二个账号或让其他玩家观察
+4. 若 `skip-default-language` 为 `true`，中文玩家会跳过翻译；要测试翻译效果请保持 `false`
+5. 确认服务端是 Paper 或其分支（Purpur 等），纯 Spigot 不支持
+6. 控制台出现“翻译失败: ...”警告时，按警告中的 HTTP 状态与内容处理（插件会输出真实错误）
 
 ## 从源码构建
 

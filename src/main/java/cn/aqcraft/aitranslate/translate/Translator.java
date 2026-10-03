@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import cn.aqcraft.aitranslate.config.ConfigManager;
 import cn.aqcraft.aitranslate.lang.Language;
+import org.bukkit.Bukkit;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -25,6 +26,11 @@ public class Translator {
     private final HttpClient http;
     private final Semaphore semaphore;
     private final boolean debug;
+
+    /** 最近一次翻译失败的原因（供 /aitr test 与日志展示），成功时为 null */
+    private volatile String lastError;
+    private final java.util.concurrent.atomic.AtomicInteger failCount = new java.util.concurrent.atomic.AtomicInteger();
+    private volatile long lastFailLogAt = 0L;
 
     public Translator(ConfigManager cfg, TranslationCache cache) {
         this.cfg = cfg;
@@ -69,7 +75,10 @@ public class Translator {
 
     private String callApi(String source, Language lang) {
         String apiKey = cfg.getOpenAiApiKey();
-        if (apiKey == null || apiKey.isEmpty()) return null;
+        if (apiKey == null || apiKey.isEmpty()) {
+            lastError = "openai.api-key 未配置";
+            return null;
+        }
 
         String base = cfg.getOpenAiBaseUrl();
         String url = base;
@@ -107,19 +116,68 @@ public class Translator {
 
             HttpResponse<String> resp = http.send(request, HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() != 200) {
+                noteFailure("HTTP " + resp.statusCode() + " " + snippet(resp.body()));
                 return null;
             }
             JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
             JsonArray choices = json.getAsJsonArray("choices");
-            if (choices == null || choices.size() == 0) return null;
+            if (choices == null || choices.size() == 0) {
+                noteFailure("响应中没有 choices（检查模型 ID 是否正确）");
+                return null;
+            }
             JsonObject message = choices.get(0).getAsJsonObject().getAsJsonObject("message");
-            if (message == null) return null;
+            if (message == null || !message.has("content")) {
+                noteFailure("响应格式异常：缺少 message.content");
+                return null;
+            }
             String content = message.get("content").getAsString();
-            if (content == null) return null;
+            if (content == null || content.isEmpty()) {
+                noteFailure("响应 message.content 为空");
+                return null;
+            }
+            lastError = null;
+            failCount.set(0);
             return content.trim();
         } catch (Exception e) {
+            noteFailure(e.getClass().getSimpleName() + ": " + e.getMessage());
             return null;
         }
+    }
+
+    /** 最近一次翻译失败的原因（成功时为 null） */
+    public String getLastError() { return lastError; }
+
+    /** /aitr test 专用：绕过缓存同步调用一次接口；失败返回 null（原因见 getLastError） */
+    public String testCall(String source, Language lang) {
+        try {
+            semaphore.acquire();
+            try {
+                lastError = null;
+                return callApi(source, lang);
+            } finally {
+                semaphore.release();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            lastError = "被中断";
+            return null;
+        }
+    }
+
+    private void noteFailure(String reason) {
+        lastError = reason;
+        int c = failCount.incrementAndGet();
+        long now = System.currentTimeMillis();
+        if (c <= 5 || now - lastFailLogAt > 60_000L) {
+            lastFailLogAt = now;
+            Bukkit.getLogger().warning("[AiTranslate] 翻译失败: " + reason);
+        }
+    }
+
+    private static String snippet(String s) {
+        if (s == null) return "";
+        String t = s.replace('\n', ' ').trim();
+        return t.length() > 180 ? t.substring(0, 180) + "..." : t;
     }
 
     public TranslationCache getCache() { return cache; }
@@ -148,7 +206,10 @@ public class Translator {
                     .GET()
                     .build();
             HttpResponse<String> resp = http.send(request, HttpResponse.BodyHandlers.ofString());
-            if (resp.statusCode() != 200) return out;
+            if (resp.statusCode() != 200) {
+                lastError = "HTTP " + resp.statusCode() + " " + snippet(resp.body());
+                return out;
+            }
             JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
             JsonArray data = json.getAsJsonArray("data");
             if (data != null) {
